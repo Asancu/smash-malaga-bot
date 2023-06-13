@@ -1,6 +1,8 @@
 # smash-malaga-bot
 This is a very simple bot written in TypeScript for Telegram created just for local gaming meet-ups and some other stuff.
 
+Use `npm i` to install the needed repositories for this to work.
+
 To activate this bot locally, simply type `npx ts-node botTelegram.ts` from the project root and add it to a Telegram group afterwards.
 
 # Command list
