@@ -103,7 +103,7 @@ bot.onText(/\/apuntame( +.*)*$/, (msg) => {
             if (dias && dias.length > 0) {   // Si el usuario ha puesto algo después del /apuntame, entra
                 let apuntadoChanged = false;  // Variable para editar o no el mensaje fijado
                 const arrayDias = dias.trim().split(' ')  // Sacamos los dias que haya puesto el usuario
-                const actualDias = procesarDias(arrayDias)  // Comprobamos que sean días válidos, no sea que el usuario haya puesto /apuntame yogurt chorizo
+                const actualDias = procesarDias(arrayDias, true)  // Comprobamos que sean días válidos, no sea que el usuario haya puesto /apuntame yogurt chorizo
 
                 const userData = userApuntado(user);  // Comprobamos si el usuario ya estaba apuntado a algo
                 if (actualDias.length > 0) {   // Si hay al menos un día válido, seguimos
@@ -147,13 +147,18 @@ bot.onText(/\/apuntame( +.*)*$/, (msg) => {
     }
 })
 
-function procesarDias(dias: string[]) {   // Función simple para comprobar si un día es válido, hay que ser muy terrorista para escribir mal los días de la semana
+function procesarDias(dias: string[], byUsuario: boolean) {   // Función simple para comprobar si un día es válido, hay que ser muy terrorista para escribir mal los días de la semana
     const result: string[] = [];
 
     for (let d of dias) {
         for (let k of diaSemana) {
-            if (d.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() === k.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() && diaDisponible(k)) {
-                result.push(k);
+            const dNormalized = d.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+            const kNormalized = k.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+            if (dNormalized === kNormalized) {
+                if (byUsuario && diaDisponible(k))
+                    result.push(k);
+                else if (!byUsuario)
+                    result.push(k);
             }
         }
     }
@@ -211,7 +216,7 @@ bot.onText(/\/apuntarSeta( +.*)*$/, (msg) => {    // Función homóloga a /apunt
 
             if (dias && dias.length > 0) {
                 const arrayDias = dias.trim().split(' ')
-                const actualDias = procesarDias(arrayDias)
+                const actualDias = procesarDias(arrayDias, true)
 
                 let diasData: myDay[] = [];
                 const userData = userApuntado(user);
@@ -279,7 +284,7 @@ bot.onText(/\/quitarSeta( +.*)*$/, (msg) => {  // Función homóloga a /apuntarS
             if (dias && dias.length > 0) {
                 let quitadoChanged = false;
                 const arrayDias = dias.trim().split(' ')
-                const actualDias = procesarDias(arrayDias)
+                const actualDias = procesarDias(arrayDias, true)
 
                 const userData = userApuntado(user);
 
@@ -328,28 +333,33 @@ bot.onText(/\/quitarSeta( +.*)*$/, (msg) => {  // Función homóloga a /apuntarS
 
 var idQuedada: number;
 
-bot.onText(/\/proximaQuedada( +[lmxjvsdLMXJVSD])+$/, (msg) => {
+bot.onText(/\/proximaQuedada( +.*)*$/, (msg) => {
     const user = msg.from;
     const chatId = msg.chat.id;
     
     if (user) {
         bot.getChatMember(chatId, user.id).then((chatMember) => {
             if(chatMember.status === "administrator" || chatMember.status === "creator") {
-                const tokensDias = msg.text?.replace('/proximaQuedada ', '').trim().split(' ');
+                const dias = msg.text?.replace('/proximaQuedada ', '');
 
-                if (tokensDias){
-                    fechas = [];
-                    fechasQuedada = fechaProximaQuedada(tokensDias);
-                    listaQuedada = [];
-                    quedadaExists = true;
+                if (dias && dias.length > 0){
+                    const arrayDias = dias.trim().split(' ')
+                    const actualDias = procesarDias(arrayDias, false)
 
-                    if (fechas.length > 0) {
-                        bot.sendMessage(chatId, generarListaQuedada()).then((message) => {
-                            idQuedada = message.message_id;
-                            bot.pinChatMessage(chatId, idQuedada);
-                        });
-                    } else {
-                        bot.sendMessage(chatId, 'No hay días válidos. Recuerda que solo valen los identificadores de los días de la semana (L M X J V S D) que aún no hayan pasado.')
+                    if (actualDias.length > 0) {
+                        fechas = [];
+                        fechasQuedada = fechaProximaQuedada(actualDias);
+                        listaQuedada = [];
+                        quedadaExists = true;
+
+                        if (fechas.length > 0) {
+                            bot.sendMessage(chatId, generarListaQuedada()).then((message) => {
+                                idQuedada = message.message_id;
+                                bot.pinChatMessage(chatId, idQuedada);
+                            });
+                        } else {
+                            bot.sendMessage(chatId, 'No hay días válidos. Recuerda que solo valen los identificadores de los días de la semana (L M X J V S D) que aún no hayan pasado.')
+                        }
                     }
                 }
             }
@@ -368,34 +378,10 @@ interface fecha {  // Estructura de las fechas
 
 let fechas: fecha[] = [];
 
-function fechaProximaQuedada(tokensDias: string[]) {  // Función que genera las fechas para cada indicador de /proximaQuedada
-    for (let t of tokensDias) {
-        let q = -1;
-        switch (t.toUpperCase()) {
-            case 'L':
-                q = 0;
-                break;
-            case 'M':
-                q = 1;
-                break;
-            case 'X':
-                q = 2;
-                break;
-            case 'J':
-                q = 3;
-                break;
-            case 'V':
-                q = 4;
-                break;
-            case 'S':
-                q = 5;
-                break;
-            case 'D':
-                q = 6;
-                break;
-            default:
-                break;
-        }
+function fechaProximaQuedada(dias: string[]) {  // Función que genera las fechas para cada indicador de /proximaQuedada
+    for (let d of dias) {
+        console.log(d);
+        let q = diaSemana.indexOf(d);
         const nextFecha = calcularNumeroDia(q);   // Función que calcula los días y el mes de la quedada. Comprueba si te pasas del día máximo de del mes y salta al siguiente, reiniciando al día 1.
 
         if (nextFecha && !fechas.find(x => x.diaSemana === diaSemana[q])) {
@@ -465,7 +451,7 @@ bot.onText(/\/quitame( +.*)*$/, (msg) => {  // Función homóloga a /apuntame. E
             if (dias && dias.length > 0) {
                 let quitadoChanged = false;
                 const arrayDias = dias.trim().split(' ');
-                const actualDias = procesarDias(arrayDias);
+                const actualDias = procesarDias(arrayDias, true);
 
                 const userData = userApuntado(user);
 
