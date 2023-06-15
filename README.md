@@ -1,16 +1,13 @@
-# smash-malaga-bot
-This is a very simple bot written in TypeScript for Telegram created just for local gaming meet-ups and some other stuff.
-
-Use `npm i` to install the needed repositories for this to work.
-
-To activate this bot locally, simply type `npx ts-node botTelegram.ts` from the project root and add it to a Telegram group afterwards.
+# My version of smash-malaga-bot
+This version is pretty much the same as the original. It reduces displayed text and images and restructures users to manage lists in a different way.
 
 # Command list
 
 - `/start` This will make the bot introduce itself.
-- `/proximaquedada` This will generate the participant list for the next meet-up.
-- `/apuntame` The user that typed this command will join the participant list.
-- `/aportarSeta` is Recommended to use just right after `/apuntame`. Users will be included in a new list with a mushroom right next to their username to point out they will bring their own console.
-- `/quitame` Deletes the user from the actual participant list.
+- `/proximaQuedada [weekdays]` This will generate the participant list for each possible day people are able to attend (admins-only command).
+- `/apuntame [weekdays]` The user that typed this command will join specific participant list (passing weekdays separated by spaces).
+- `/apuntarSeta [weekdays]` Users will be updated in the list with a mushroom right next to their username to point out they will bring their own console. If users didn't join a list previously via the /apuntame command they will be in automatically (passing weekdays separated by spaces).
+- `/quitame [weekdays]` Deletes the user from any participant list (passing weekdays separated by spaces).
+- `/quitarSeta [weekdays]` Just like /apuntarSeta this command will remove the console identifier from users nickname (passing weekdays separated by spaces).
 - `/ruleset` This generates an image with the official ruleset and stages for Smash Málaga.
 - `/fullruleset` To be used right after typing `ruleset` in. This will explain the procedure to play a set in tournaments.
