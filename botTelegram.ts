@@ -10,7 +10,7 @@ const bot = new TelegramBot(token, { polling: true });
 
 // Estructura de los usuarios
 interface myUser {
-    user:  TelegramBot.User;
+    user: TelegramBot.User;
     dias: myDay[];
     preferredName?: string;
 };
@@ -55,7 +55,7 @@ let fechasQuedada = ''; // Aquí van todos los días que pueda haber quedada seg
 // Función para generar la lista para la próxima quedada
 function generarListaQuedada() {
     let textoQuedada =
-`Quedada(s) de esta semana:
+        `Quedada(s) de esta semana:
 
 ${fechasQuedada}
 Podéis apuntaros a cualquier día
@@ -66,8 +66,8 @@ Recordad que el día con más asistentes será el elegido para quedar
 💵 4€ por persona\n`;
 
     for (let f of fechas) {  //Por cada fecha que pueda haber quedada se genera una lista de usuarios y setups
-        textoQuedada += 
-        `\n👥 Asistentes ${f.diaSemana} ${f.numeroDia}:\n`;
+        textoQuedada +=
+            `\n👥 Asistentes ${f.diaSemana} ${f.numeroDia}:\n`;
 
         for (const u of listaQuedada) {
             for (const d of u.dias) {
@@ -95,7 +95,7 @@ bot.onText(/\/apuntame( +.*)*$/, (msg) => {
         * 
         * La funcionalidad de todos esos comandos es prácticamente igual a excepción de las condiciones para agregar, quitar o modificar información
         * de los usuarios de la quedada. No se comentará lo que funcione de forma homóloga, sólo aquello que sea más específico de cada método
-        */ 
+        */
 
         // Verificar si el usuario existe
         if (user) {
@@ -120,22 +120,23 @@ bot.onText(/\/apuntame( +.*)*$/, (msg) => {
                             if (found) {         // Si el día ya está incluido en sus días, se le avisa de que ya estaba apuntado
                                 bot.sendMessage(chatId, `Ya estabas apuntad@ el ${d.toLowerCase()}, @${user.username || user.first_name}...`);
                             } else {            // Si no, se incluye en sus días y cambiamos la variable para editar el fijado
-                                listaQuedada[userData.index].dias.push({dia: d, setup: false});
+                                listaQuedada[userData.index].dias.push({ dia: d, setup: false });
                                 apuntadoChanged = true;
                             }
                         }
                         if (apuntadoChanged) {    // Si ha habido cambios en el usuario, se edita el mensaje
-                            bot.editMessageText(generarListaQuedada(), {chat_id: chatId, message_id: idQuedada}).then(res => {
+                            bot.editMessageText(generarListaQuedada(), { chat_id: chatId, message_id: idQuedada }).then(res => {
                                 bot.sendMessage(chatId, `¡Estás dentro, @${user.username || user.first_name}!`);
                             });
                         }
                     } else {  // Si el usuario no estaba apuntado a nada, se le apunta a los días directamente
                         let diasData: myDay[] = [];
                         for (const d of actualDias) {
-                            diasData.push({dia: d, setup: false});
+                            diasData.push({ dia: d, setup: false });
                         }
-                        listaQuedada.push({user: user, dias: diasData});  // Se introduce el nuevo usuario
-                        bot.editMessageText(generarListaQuedada(), {chat_id: chatId, message_id: idQuedada});  // Se edita el mensaje fijado
+                        listaQuedada.push({ user: user, dias: diasData });  // Se introduce el nuevo usuario
+                        bot.editMessageText(generarListaQuedada(), { chat_id: chatId, message_id: idQuedada });  // Se edita el mensaje fijado
+                        bot.sendMessage(chatId, `¡Vale, ya estás en la lista, @${user.username}!`)
                     }
                 }
             } else {     // Si el usuario no incluye días, se le avisa
@@ -177,10 +178,10 @@ function diaDisponible(dia: string) {   // Función para ver si un día correspo
 function userApuntado(user: TelegramBot.User) {   // Función para saber si un usuario está apuntado a algún día
     for (let [index, u] of listaQuedada.entries()) {
         if (u.user.id === user.id) {
-            return {exists: true, dias: u.dias, index: index};
+            return { exists: true, dias: u.dias, index: index };
         }
     }
-    return {exists: false, dias: [], index: -1};
+    return { exists: false, dias: [], index: -1 };
 }
 
 bot.onText(/\/cambiarNick( +.*)*$/, (msg) => {  // Función para cambiarte el nick de TODAS las listas en las que estés, se puede cambiar múltiples veces (fiesta)
@@ -195,13 +196,13 @@ bot.onText(/\/cambiarNick( +.*)*$/, (msg) => {  // Función para cambiarte el ni
             const apuntado = userApuntado(user);
             if (apuntado.exists) {
                 listaQuedada[apuntado.index].preferredName = preferredName;
-                bot.editMessageText(generarListaQuedada(), {chat_id: chatId, message_id: idQuedada});
+                bot.editMessageText(generarListaQuedada(), { chat_id: chatId, message_id: idQuedada });
                 bot.sendMessage(chatId, `¡Nick cambiado @${user.username || user.first_name}!`);
                 return;
             }
         }
     } else {
-        bot.sendMessage(chatId, 'Aún no hay quedada(s) para esta semana.');
+        bot.sendMessage(chatId, 'No te puedo quitar de la quedada ¡porque no hay quedadas creadas!');
     }
 })
 
@@ -221,7 +222,7 @@ bot.onText(/\/apuntarSeta( +.*)*$/, (msg) => {    // Función homóloga a /apunt
                 let diasData: myDay[] = [];
                 const userData = userApuntado(user);
 
-                
+
                 if (actualDias.length > 0) {
                     if (userData.exists) {
                         diasData = userData.dias;
@@ -244,17 +245,17 @@ bot.onText(/\/apuntarSeta( +.*)*$/, (msg) => {    // Función homóloga a /apunt
                                     modificarSetup(userData.index, dayIndex, true);
                                 }
                             } else {
-                                diasData.push({dia: d, setup: true});
+                                diasData.push({ dia: d, setup: true });
                             }
                         }
-                        bot.editMessageText(generarListaQuedada(), {chat_id: chatId, message_id: idQuedada});
+                        bot.editMessageText(generarListaQuedada(), { chat_id: chatId, message_id: idQuedada });
                         bot.sendMessage(chatId, `¡Setup apuntada, @${user.username || user.first_name}! Gracias por aportar material. 😊`);
                     } else {
                         for (const d of actualDias) {
-                            diasData.push({dia: d, setup: true});
+                            diasData.push({ dia: d, setup: true });
                         }
-                        listaQuedada.push({user: user, dias: diasData});
-                        bot.editMessageText(generarListaQuedada(), {chat_id: chatId, message_id: idQuedada});
+                        listaQuedada.push({ user: user, dias: diasData });
+                        bot.editMessageText(generarListaQuedada(), { chat_id: chatId, message_id: idQuedada });
                     }
                 }
             } else {
@@ -313,11 +314,11 @@ bot.onText(/\/quitarSeta( +.*)*$/, (msg) => {  // Función homóloga a /apuntarS
                             }
                         }
                         if (quitadoChanged) {
-                            bot.editMessageText(generarListaQuedada(), {chat_id: chatId, message_id: idQuedada}).then(res => {
+                            bot.editMessageText(generarListaQuedada(), { chat_id: chatId, message_id: idQuedada }).then(res => {
                                 bot.sendMessage(chatId, `¡Setup quitada, @${user.username || user.first_name}!`);
                             });
                         }
-                    } 
+                    }
                     else {
                         bot.sendMessage(chatId, `No estás apuntado a ningún día, @${user.username || user.first_name}...`);
                     }
@@ -336,13 +337,13 @@ var idQuedada: number;
 bot.onText(/\/proximaQuedada( +.*)*$/, (msg) => {
     const user = msg.from;
     const chatId = msg.chat.id;
-    
+
     if (user) {
         bot.getChatMember(chatId, user.id).then((chatMember) => {
-            if(chatMember.status === "administrator" || chatMember.status === "creator") {
+            if (chatMember.status === "administrator" || chatMember.status === "creator") {
                 const dias = msg.text?.replace('/proximaQuedada ', '');
 
-                if (dias && dias.length > 0){
+                if (dias && dias.length > 0) {
                     const arrayDias = dias.trim().split(' ')
                     const actualDias = procesarDias(arrayDias, false)
 
@@ -360,10 +361,10 @@ bot.onText(/\/proximaQuedada( +.*)*$/, (msg) => {
                         } else {
                             bot.sendMessage(chatId, 'No hay días válidos. Recuerda que solo valen los identificadores de los días de la semana (L M X J V S D) que aún no hayan pasado.')
                         }
-                    } else {
-                        bot.sendMessage(chatId, "Por favor, dime un día válido si no te importa... \n '/proximaQuedada sabado', por ejemplo.");
                     }
-                } 
+                } else {
+                    bot.sendMessage(chatId, "Por favor, dime un día válido si no te importa... \n '/proximaQuedada sabado', por ejemplo.");
+                }
             }
             else {
                 bot.sendMessage(chatId, `Buen intento, @${user.username || user.first_name}, pero no eres admin ni mucho menos creador...`);
@@ -387,7 +388,7 @@ function fechaProximaQuedada(dias: string[]) {  // Función que genera las fecha
         const nextFecha = calcularNumeroDia(q);   // Función que calcula los días y el mes de la quedada. Comprueba si te pasas del día máximo de del mes y salta al siguiente, reiniciando al día 1.
 
         if (nextFecha && !fechas.find(x => x.diaSemana === diaSemana[q])) {
-            fechas.push({diaSemana: diaSemana[q], numeroDia: nextFecha.dia, mes: mes[nextFecha.mes]});
+            fechas.push({ diaSemana: diaSemana[q], numeroDia: nextFecha.dia, mes: mes[nextFecha.mes] });
         }
 
         fechas.sort((a, b) => {
@@ -407,7 +408,7 @@ function calcularNumeroDia(weekDay: number) {
     const hoy = new Date();
     let numToday = hoy.getDay() - 1;
 
-    if(numToday < 0)  // Al cambiar el orden del array de días, por pura legibilidad, hacemos que el domingo sea el día 6
+    if (numToday < 0)  // Al cambiar el orden del array de días, por pura legibilidad, hacemos que el domingo sea el día 6
         numToday = 6;
 
     if (weekDay >= numToday) {
@@ -422,7 +423,7 @@ function calcularNumeroDia(weekDay: number) {
                 anyo % 100 === 0 ? (anyo % 400 === 0 ? maxDay = 29 : maxDay = 28) : maxDay = 29;
             } else {
                 maxDay = 28;
-            }               
+            }
         }
         else if (thisMonth === 3 || thisMonth === 5 || thisMonth === 8 || thisMonth === 10)   // 30 para abril, junio, septiembre y noviembre
             maxDay = 30;
@@ -437,7 +438,7 @@ function calcularNumeroDia(weekDay: number) {
             newDay = newDay - maxDay;
         }
 
-        return {dia: newDay, mes: thisMonth};
+        return { dia: newDay, mes: thisMonth };
     }
 
     return null;
@@ -457,7 +458,7 @@ bot.onText(/\/quitame( +.*)*$/, (msg) => {  // Función homóloga a /apuntame. E
 
                 const userData = userApuntado(user);
 
-                
+
                 if (actualDias.length > 0) {
                     if (userData.exists) {
                         for (const d of actualDias) {
@@ -482,7 +483,7 @@ bot.onText(/\/quitame( +.*)*$/, (msg) => {  // Función homóloga a /apuntame. E
                             }
                         }
                         if (quitadoChanged) {
-                            bot.editMessageText(generarListaQuedada(), {chat_id: chatId, message_id: idQuedada}).then(res => {
+                            bot.editMessageText(generarListaQuedada(), { chat_id: chatId, message_id: idQuedada }).then(res => {
                                 bot.sendMessage(chatId, `¡Ya no estás en la quedada, @${user.username || user.first_name}! Esperamos verte en la próxima.`);
                             });
                         }
@@ -495,14 +496,14 @@ bot.onText(/\/quitame( +.*)*$/, (msg) => {  // Función homóloga a /apuntame. E
             }
         }
     } else {
-        bot.sendMessage(chatId, 'Aún no hay quedada(s) para esta semana.');
+        bot.sendMessage(chatId, '¡Echa el freno, madaleno! ¡No se ha anunciado ninguna quedada!');
     }
 });
 
 bot.onText(/\/aiuda/, (msg) => {  // La misma función que tenías, ligeramente formateada y con la información nueva
     const chatId = msg.chat.id;
     bot.sendMessage(chatId,
-`¿Necesitas saber qué comandos puedes usar? ¡Hagamos memoria!
+        `¿Necesitas saber qué comandos puedes usar? ¡Hagamos memoria!
 
 /proximaQuedada [días]
 Esto generará la lista de asistentes para la semana (sólo admins) (Ejemplo: "/proximaQuedada viernes" o "/proximaQuedada viernes sabado").
@@ -524,7 +525,7 @@ Cambia el nick con el que aparecerás en todas las listas (Ejemplo: "/cambiarNic
 
 /ruleset
 Imprime una imagen del reglamento oficial en el que jugamos con su stagelist actual en Smash Málaga. /fullruleset para el procedimiento completo.`
-);
+    );
 })
 
 // Escucha el evento de nuevos miembros en el grupo
@@ -536,15 +537,15 @@ bot.on('new_chat_members', (msg) => {
     newMembers?.forEach((member) => {
         const memberName = member.username || member.first_name;
         const newChallengerImgPath = "assets/images/newChallenger.gif"
-            if (member.username != "SmashMalagaBot") { // Condicional para que no se dé la bienvenida así mismo. Eso es demasiado narcisista y está feo
-                bot.sendAnimation(chatId, newChallengerImgPath);
+        if (member.username != "smashmalaga_bot") { // Condicional para que no se dé la bienvenida así mismo. Eso es demasiado narcisista y está feo
+            bot.sendAnimation(chatId, newChallengerImgPath);
 
-                const holaIllo =
-                    `¡Nuev@ contrincante! ¡Te doy la bienvenida al grupo de Smash Málaga, @${memberName}! Espero que disfrutes de tu estancia. Recuerda que hacemos quedadas todos los fines de semana. 
+            const holaIllo =
+                `¡Nuev@ contrincante! ¡Te doy la bienvenida al grupo de Smash Málaga, @${memberName}! Espero que disfrutes de tu estancia. Recuerda que hacemos quedadas todos los fines de semana. 
                 \n ¡Escribe /aiuda para saber qué puedes hacer!`;
 
-                // Enviar el mensaje de bienvenida al nuevo miembro
-                bot.sendMessage(chatId, holaIllo); 
+            // Enviar el mensaje de bienvenida al nuevo miembro
+            bot.sendMessage(chatId, holaIllo);
         }
     });
 });
@@ -563,9 +564,9 @@ cron.schedule('0 0 * * 1', () => {
 // El primer parámetro en los métodos sendMessage es el ID del Chat de Smash Málaga.
 cron.schedule('0 16 * * 3', () => {
     if (quedadaExists) {
-        bot.sendMessage('-1001453683627', '🎮 Recuerda que ya hay lista para quedar esta semana. Échale un vistazo a los mensajes fijados para ver los detalles.');
+        bot.sendMessage('-1001204113061', '🎮 Recuerda que ya hay lista para quedar esta semana. Échale un vistazo a los mensajes fijados para ver los detalles.');
     } else {
-        bot.sendMessage('-1001453683627', '⚠ Recordatorio para los admins: aún no se ha habilitado lista para quedada esta semana. Recordad que con "/proximaQuedada L M X J V S D" podéis hacerlo');
+        bot.sendMessage('-1001204113061', '⚠ Recordatorio para los admins: aún no se ha habilitado lista para quedada esta semana. Recordad que con "/proximaQuedada L M X J V S D" podéis hacerlo');
     }
 })
 
@@ -574,13 +575,13 @@ bot.onText(/\/ruleset/, (msg) => {
     const rulesetPath = 'assets/images/ruleset.jpg'; // Ruta de la imagen 
     const chatId = msg.chat.id;
 
-    bot.sendPhoto(chatId, rulesetPath, {caption: 'Aquí tienes el ruleset oficial. Se juega a 3 stocks 7 minutos y los bans son 3-4-1.\n\nEscribe /fullruleset para explicarte el procedimiento completo.'});
+    bot.sendPhoto(chatId, rulesetPath, { caption: 'Aquí tienes el ruleset oficial. Se juega a 3 stocks 7 minutos y los bans son 3-4-1.\n\nEscribe /fullruleset para explicarte el procedimiento completo.' });
 })
 
 bot.onText(/\/fullruleset/, (msg) => {
     const chatId = msg.chat.id;
     bot.sendMessage(chatId,
-`1️⃣ El orden de baneo se decide a piedra-papel-tijera. Quien gane, será el primero en banear 3 escenarios.
+        `1️⃣ El orden de baneo se decide a piedra-papel-tijera. Quien gane, será el primero en banear 3 escenarios.
 
 2️⃣ Luego, el perdedor baneará otros 4 escenarios.
 
