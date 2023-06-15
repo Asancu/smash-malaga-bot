@@ -3,7 +3,7 @@ import cron from 'node-cron';
 
 
 // Este es el token del bot. NO LO TOQUES O NO FUNCIONARÁ. POR FAVOR. ¡¡¡QUE NO LO TOQUES!!!
-const token = '6021834143:AAGemZdEuSEr4JcTWhn6B51XYK37cf4onW0';
+const token = 'TOKEN';
 
 // Crea una nueva instancia del bot
 const bot = new TelegramBot(token, { polling: true });
