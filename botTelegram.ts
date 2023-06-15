@@ -3,7 +3,7 @@ import cron from 'node-cron';
 
 
 // Este es el token del bot. NO LO TOQUES O NO FUNCIONARÁ. POR FAVOR. ¡¡¡QUE NO LO TOQUES!!!
-const token = '5900983959:AAGKjUKT9nkIQ-VNNHv_H5Qs4ivPOLSO8Z0';
+const token = '6021834143:AAGemZdEuSEr4JcTWhn6B51XYK37cf4onW0';
 
 // Crea una nueva instancia del bot
 const bot = new TelegramBot(token, { polling: true });
@@ -34,8 +34,8 @@ bot.onText(/\/start/, (msg) => {
 
     // Mensaje de respuesta al comando /start
     const responseOne = '¡Hola! Espero que no os pille desprevenidos. ¡Soy SmashMalagaBot! El nombre es horrible, lo sé, pero mi creador, Asancu., está falto de ideas y no se le ocurrió otro, el muy bobo.';
-    const responseTwo = '¡Actuaré como secretario y os ayudaré a gestionar la lista de quedadas! Podéis escribir: \n /proximaquedada Esto generará la lista de asistentes para la nueva quedada. \n /apuntame Apúntate a la próxima quedada. \n /quitame Quítate de la quedada si al final no puedes o no quieres asistir. \n /ruleset Echa un ojo al ruleset oficial de Smash Málaga.'
-    const responseThree = 'Gente, estoy en una fase muy temprana de desarrollo y puede que haya errores. Estoy bastante nervioso y no sé cómo saldrá esto, pero cualquier sugerencia podéis escribir a Asancu. o manifestarla por aquí. \n **Desarrolladores**, si estáis interesados, ¡puedo subirme a GitHub! A ver si entre todos podéis ponerme a punto como es debido... \n\n ¡Sed buenos!'
+    const responseTwo = '¡Os ayudaré con las quedadas y más! Escribid /aiuda para más información.';
+    const responseThree = 'Gente, estoy en una fase muy temprana de desarrollo y puede que haya errores. Estoy bastante nervioso y no sé cómo saldrá esto, pero cualquier sugerencia podéis escribir a Asancu. o manifestarla por aquí. \n **Desarrolladores**, si estáis interesados, ¡buscadme en GitHub! \n\n ¡Sed buenos!'
 
     // Enviar la respuesta al comando /start
     async function enviarMensajesApuntado(chatId: number) {
@@ -59,6 +59,7 @@ function generarListaQuedada() {
 
 ${fechasQuedada}
 Podéis apuntaros a cualquier día
+Recordad que el día con más asistentes será el elegido para quedar
 
 🕔 16:30 - 20:30
 🏛 La Ciénaga Hobby Shop (C. Leopoldo Alas "Clarín", 3, 29002 Málaga) - https://goo.gl/maps/9VE1Wp85apkyCpjW6
@@ -104,7 +105,6 @@ bot.onText(/\/apuntame( +.*)*$/, (msg) => {
                 let apuntadoChanged = false;  // Variable para editar o no el mensaje fijado
                 const arrayDias = dias.trim().split(' ')  // Sacamos los dias que haya puesto el usuario
                 const actualDias = procesarDias(arrayDias, true)  // Comprobamos que sean días válidos, no sea que el usuario haya puesto /apuntame yogurt chorizo
-
                 const userData = userApuntado(user);  // Comprobamos si el usuario ya estaba apuntado a algo
                 if (actualDias.length > 0) {   // Si hay al menos un día válido, seguimos
                     if (userData.exists) {       // Si el usuario ya estaba apuntado, hay que hacer unas comprobaciones
@@ -118,7 +118,7 @@ bot.onText(/\/apuntame( +.*)*$/, (msg) => {
                             }
 
                             if (found) {         // Si el día ya está incluido en sus días, se le avisa de que ya estaba apuntado
-                                bot.sendMessage(chatId, `Ya estás apuntad@ el ${d.toLowerCase()} @${user.username || user.first_name}`);
+                                bot.sendMessage(chatId, `Ya estabas apuntad@ el ${d.toLowerCase()}, @${user.username || user.first_name}...`);
                             } else {            // Si no, se incluye en sus días y cambiamos la variable para editar el fijado
                                 listaQuedada[userData.index].dias.push({dia: d, setup: false});
                                 apuntadoChanged = true;
@@ -126,7 +126,7 @@ bot.onText(/\/apuntame( +.*)*$/, (msg) => {
                         }
                         if (apuntadoChanged) {    // Si ha habido cambios en el usuario, se edita el mensaje
                             bot.editMessageText(generarListaQuedada(), {chat_id: chatId, message_id: idQuedada}).then(res => {
-                                bot.sendMessage(chatId, `¡Apuntad@ @${user.username || user.first_name}!`);
+                                bot.sendMessage(chatId, `¡Estás dentro, @${user.username || user.first_name}!`);
                             });
                         }
                     } else {  // Si el usuario no estaba apuntado a nada, se le apunta a los días directamente
@@ -139,11 +139,11 @@ bot.onText(/\/apuntame( +.*)*$/, (msg) => {
                     }
                 }
             } else {     // Si el usuario no incluye días, se le avisa
-                bot.sendMessage(chatId, `Debes especificar qué días quieres ir @${user.username || user.first_name}`);
+                bot.sendMessage(chatId, `¿Pero qué días quieres ir, @${user.username || user.first_name}? \n Recuerda: "/apuntame [día/s]".`);
             }
         }
     } else {      // Si no hay quedada creada, se le avisa
-        bot.sendMessage(chatId, 'Aún no hay quedada(s) para esta semana.');
+        bot.sendMessage(chatId, '¡Qué impaciente! ¡Aún no hay quedada creada! Espera a que el Staff crea una.');
     }
 })
 
@@ -238,7 +238,7 @@ bot.onText(/\/apuntarSeta( +.*)*$/, (msg) => {    // Función homóloga a /apunt
 
                             if (dayIndex >= 0) {
                                 if (listaQuedada[userData.index].dias[dayIndex].setup) {
-                                    bot.sendMessage(chatId, `Ya llevas setup el ${d.toLowerCase()} @${user.username || user.first_name}`);
+                                    bot.sendMessage(chatId, `Ya llevas setup el ${d.toLowerCase()}, @${user.username || user.first_name}...`);
                                     return;
                                 } else {
                                     modificarSetup(userData.index, dayIndex, true);
@@ -248,7 +248,7 @@ bot.onText(/\/apuntarSeta( +.*)*$/, (msg) => {    // Función homóloga a /apunt
                             }
                         }
                         bot.editMessageText(generarListaQuedada(), {chat_id: chatId, message_id: idQuedada});
-                        bot.sendMessage(chatId, `¡Setup apuntada @${user.username || user.first_name}!`);
+                        bot.sendMessage(chatId, `¡Setup apuntada, @${user.username || user.first_name}! Gracias por aportar material. 😊`);
                     } else {
                         for (const d of actualDias) {
                             diasData.push({dia: d, setup: true});
@@ -258,11 +258,11 @@ bot.onText(/\/apuntarSeta( +.*)*$/, (msg) => {    // Función homóloga a /apunt
                     }
                 }
             } else {
-                bot.sendMessage(chatId, `Debes especificar qué días quieres llevar setup @${user.username || user.first_name}`);
+                bot.sendMessage(chatId, `¿Y qué días quieres llevar setup, @${user.username || user.first_name}? \n Recuerda: /apuntarSeta [día/s].`);
             }
         }
     } else {
-        bot.sendMessage(chatId, 'Aún no hay quedada(s) para esta semana.');
+        bot.sendMessage(chatId, '¡No hay quedada aún! De momento, juega con tu setup en casa, ¿vale?');
     }
 })
 
@@ -306,28 +306,28 @@ bot.onText(/\/quitarSeta( +.*)*$/, (msg) => {  // Función homóloga a /apuntarS
                                     modificarSetup(userData.index, dayIndex, false);
                                     quitadoChanged = true;
                                 } else {
-                                    bot.sendMessage(chatId, `No traías setup el ${d.toLowerCase()} @${user.username || user.first_name}`);
+                                    bot.sendMessage(chatId, `No traías setup el ${d.toLowerCase()} de todos modos, @${user.username || user.first_name}...`);
                                 }
                             } else {
-                                bot.sendMessage(chatId, `No estás apuntado el ${d.toLowerCase()} @${user.username || user.first_name}`);
+                                bot.sendMessage(chatId, `No te apuntaste el ${d.toLowerCase()}, @${user.username || user.first_name}...`);
                             }
                         }
                         if (quitadoChanged) {
                             bot.editMessageText(generarListaQuedada(), {chat_id: chatId, message_id: idQuedada}).then(res => {
-                                bot.sendMessage(chatId, `¡Setup quitada @${user.username || user.first_name}!`);
+                                bot.sendMessage(chatId, `¡Setup quitada, @${user.username || user.first_name}!`);
                             });
                         }
                     } 
                     else {
-                        bot.sendMessage(chatId, `No estás apuntado a ningún día @${user.username || user.first_name}`);
+                        bot.sendMessage(chatId, `No estás apuntado a ningún día, @${user.username || user.first_name}...`);
                     }
                 }
             } else {
-                bot.sendMessage(chatId, `Debes especificar qué días quieres llevar setup @${user.username || user.first_name}`);
+                bot.sendMessage(chatId, `¿Podrías especificar qué días no vas a llevar setup, @${user.username || user.first_name}? \n Recuerda: "/quitarSeta [día/s]".`);
             }
         }
     } else {
-        bot.sendMessage(chatId, 'Aún no hay quedada(s) para esta semana.');
+        bot.sendMessage(chatId, 'No necesitamos setup porque... ¡no hay ninguna quedada, ill@!');
     }
 });
 
@@ -360,11 +360,13 @@ bot.onText(/\/proximaQuedada( +.*)*$/, (msg) => {
                         } else {
                             bot.sendMessage(chatId, 'No hay días válidos. Recuerda que solo valen los identificadores de los días de la semana (L M X J V S D) que aún no hayan pasado.')
                         }
+                    } else {
+                        bot.sendMessage(chatId, "Por favor, dime un día válido si no te importa... \n '/proximaQuedada sabado', por ejemplo.");
                     }
-                }
+                } 
             }
             else {
-                bot.sendMessage(chatId, `No eres admin @${user.username || user.first_name}.`);
+                bot.sendMessage(chatId, `Buen intento, @${user.username || user.first_name}, pero no eres admin ni mucho menos creador...`);
             }
         });
     }
@@ -396,7 +398,7 @@ function fechaProximaQuedada(dias: string[]) {  // Función que genera las fecha
     // Devolvemos las fechas futuras
     let textoFechas = '';
     for (let f of fechas) {
-        textoFechas += `${f.diaSemana} ${f.numeroDia} de ${f.mes}\n`;
+        textoFechas += `${f.diaSemana}, ${f.numeroDia} de ${f.mes}\n`;
     }
     return textoFechas;
 }
@@ -476,20 +478,20 @@ bot.onText(/\/quitame( +.*)*$/, (msg) => {  // Función homóloga a /apuntame. E
                                     listaQuedada.splice(userData.index, 1);
                                 }
                             } else {
-                                bot.sendMessage(chatId, `No estás apuntado el ${d.toLowerCase()} @${user.username || user.first_name}`);
+                                bot.sendMessage(chatId, `Pero si no estás apuntado el ${d.toLowerCase()} @${user.username || user.first_name}...`);
                             }
                         }
                         if (quitadoChanged) {
                             bot.editMessageText(generarListaQuedada(), {chat_id: chatId, message_id: idQuedada}).then(res => {
-                                bot.sendMessage(chatId, `¡Quitad@ @${user.username || user.first_name}!`);
+                                bot.sendMessage(chatId, `¡Ya no estás en la quedada, @${user.username || user.first_name}! Esperamos verte en la próxima.`);
                             });
                         }
                     } else {
-                        bot.sendMessage(chatId, `No estás apuntado a ningún día @${user.username || user.first_name}`);
+                        bot.sendMessage(chatId, `No estás apuntado a ningún día, @${user.username || user.first_name}...`);
                     }
                 }
             } else {
-                bot.sendMessage(chatId, `Debes especificar de qué días quieres quitarte @${user.username || user.first_name}`);
+                bot.sendMessage(chatId, `¿Y de qué días te quieres quitar, @${user.username || user.first_name}? \n Recuerda: "/quitame [día/s]"`);
             }
         }
     } else {
@@ -500,28 +502,28 @@ bot.onText(/\/quitame( +.*)*$/, (msg) => {  // Función homóloga a /apuntame. E
 bot.onText(/\/aiuda/, (msg) => {  // La misma función que tenías, ligeramente formateada y con la información nueva
     const chatId = msg.chat.id;
     bot.sendMessage(chatId,
-`¿Necesitas saber qué comandos puedes usar? ¡Yo te lo recuerdo!
+`¿Necesitas saber qué comandos puedes usar? ¡Hagamos memoria!
 
-/proximaquedada [días]
-Esto generará la lista de asistentes para la semana (sólo admins).
+/proximaQuedada [días]
+Esto generará la lista de asistentes para la semana (sólo admins) (Ejemplo: "/proximaQuedada viernes" o "/proximaQuedada viernes sabado").
 
-/apuntame [dias]
-Apúntate a los días que puedas (separados por espacios).
+/apuntame [días]
+Apúntate a los días que puedas (separados por espacios) (Ejemplo: "/apuntame viernes", "/apuntame viernes sabado").
 
 /quitame [días]
-Quítate de los días que no vayas a asistir (separados por espacios).
+Quítate de los días que no vayas a asistir (separados por espacios) (Ejemplo: "/quitame viernes", "/quitame viernes sabado").
 
 /apuntarSeta [días]
-Apunta tu setup a los días que puedas llevarla (separados por espacios).
+Apunta tu setup a los días que puedas llevarla (separados por espacios) (Ejemplo: "/apuntarSeta viernes", "/apuntarSeta viernes sabado").
 
 /quitarSeta [días]
-Quita tu setup de los días que no puedas llevarla (separados por espacios).
+Quita tu setup de los días que no puedas llevarla (separados por espacios) (Ejemplo: "/quitarSeta viernes", "/quitarSeta viernes sabado").
 
 /cambiarNick 'nuevo-nick'
-Cambia el nick con el que aparecerás en todas las listas
+Cambia el nick con el que aparecerás en todas las listas (Ejemplo: "/cambiarNick copixuelas" ).
 
 /ruleset
-Imprime una imagen del reglamento oficial en el que jugamos con su stagelist actual en Smash Málaga.`
+Imprime una imagen del reglamento oficial en el que jugamos con su stagelist actual en Smash Málaga. /fullruleset para el procedimiento completo.`
 );
 })
 
@@ -534,14 +536,16 @@ bot.on('new_chat_members', (msg) => {
     newMembers?.forEach((member) => {
         const memberName = member.username || member.first_name;
         const newChallengerImgPath = "assets/images/newChallenger.gif"
-        bot.sendAnimation(chatId, newChallengerImgPath);
+            if (member.username != "SmashMalagaBot") { // Condicional para que no se dé la bienvenida así mismo. Eso es demasiado narcisista y está feo
+                bot.sendAnimation(chatId, newChallengerImgPath);
 
-        const holaIllo =
-            `¡Se acerca un nuev@ contrincante! ¡Te doy la bienvenida al grupo de Smash Málaga, ${memberName}! Espero que disfrutes de tu estancia.
-        \n Hacemos quedadas todos los fines de semana. ¡Escribe /aiuda para saber qué puedes hacer!`;
+                const holaIllo =
+                    `¡Nuev@ contrincante! ¡Te doy la bienvenida al grupo de Smash Málaga, @${memberName}! Espero que disfrutes de tu estancia. Recuerda que hacemos quedadas todos los fines de semana. 
+                \n ¡Escribe /aiuda para saber qué puedes hacer!`;
 
-        // Enviar el mensaje de bienvenida al nuevo miembro
-        bot.sendMessage(chatId, holaIllo);
+                // Enviar el mensaje de bienvenida al nuevo miembro
+                bot.sendMessage(chatId, holaIllo); 
+        }
     });
 });
 
@@ -556,11 +560,12 @@ cron.schedule('0 0 * * 1', () => {
 })
 
 // Aquí igual, pero hacemos un recordatorio a los usuarios o a los admins de si hay quedada o no, los miércoles a las 16:00.
+// El primer parámetro en los métodos sendMessage es el ID del Chat de Smash Málaga.
 cron.schedule('0 16 * * 3', () => {
     if (quedadaExists) {
-        bot.sendMessage('-1001453683627', 'Recuerda que ya hay lista para quedar esta semana. Échale un vistazo a los mensajes fijados para ver los detalles.');
+        bot.sendMessage('-1001453683627', '🎮 Recuerda que ya hay lista para quedar esta semana. Échale un vistazo a los mensajes fijados para ver los detalles.');
     } else {
-        bot.sendMessage('-1001453683627', 'Recordatorio para los admins: aún no se ha habilitado lista para quedada esta semana. Recordad que con "/proximaQuedada L M X J V S D" podéis hacerlo');
+        bot.sendMessage('-1001453683627', '⚠ Recordatorio para los admins: aún no se ha habilitado lista para quedada esta semana. Recordad que con "/proximaQuedada L M X J V S D" podéis hacerlo');
     }
 })
 
@@ -590,7 +595,14 @@ bot.onText(/\/fullruleset/, (msg) => {
     bot.sendMessage(chatId, "NOTA: Antes de empezar con el ban de escenarios, decid qué personaje jugaréis al unísono.")
 })
 
-// VIVA MÁLAGA Es broma. Código por Asancu.
+bot.onText(/\/mamataoacuanto/, (msg) => {
+    const chatId = msg.chat.id;
+    const fechaHoy = new Date();
+    bot.sendMessage(chatId, `Son las ${fechaHoy} es hora de jugar bajo presión`);
+})
+
+// VIVA MÁLAGA Es broma.
+// Asancu (Código base)
 
 // Colaboradores (esta es la parte en la que metes tu nombre si quieres, aunque solo hayas cambiado un pedacico de código, toda ayuda es bien agradecida):
-// Karka https://github.com/jmmdev / https://jmmdev.github.io)  =)
+// Karka https://github.com/jmmdev / https://jmmdev.github.io)  =) (Rework del código)
