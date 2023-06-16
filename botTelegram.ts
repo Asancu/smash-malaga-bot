@@ -546,6 +546,8 @@ bot.on('new_chat_members', (msg) => {
 
             // Enviar el mensaje de bienvenida al nuevo miembro
             bot.sendMessage(chatId, holaIllo);
+        } else {
+            bot.sendMessage(chatId, "¡Estamos activos papi! ¡Hola a todo el mundo! 👋")
         }
     });
 });
