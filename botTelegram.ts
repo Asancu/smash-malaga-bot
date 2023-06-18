@@ -202,7 +202,7 @@ bot.onText(/\/cambiarNick( +.*)*$/, (msg) => {  // Función para cambiarte el ni
             }
         }
     } else {
-        bot.sendMessage(chatId, 'No te puedo quitar de la quedada ¡porque no hay quedadas creadas!');
+        bot.sendMessage(chatId, 'Vamos a ver, para cambiarte el nick, primero tiene que haber quedada...');
     }
 })
 
@@ -340,34 +340,37 @@ bot.onText(/\/proximaQuedada( +.*)*$/, (msg) => {
 
     if (user) {
         bot.getChatMember(chatId, user.id).then((chatMember) => {
-            if (chatMember.status === "administrator" || chatMember.status === "creator") {
-                const dias = msg.text?.replace('/proximaQuedada ', '');
+            if (chatId !== 1204113061)
+                if (chatMember.status === "administrator" || chatMember.status === "creator") {
+                    const dias = msg.text?.replace('/proximaQuedada ', '');
 
-                if (dias && dias.length > 0) {
-                    const arrayDias = dias.trim().split(' ')
-                    const actualDias = procesarDias(arrayDias, false)
+                    if (dias && dias.length > 0) {
+                        const arrayDias = dias.trim().split(' ')
+                        const actualDias = procesarDias(arrayDias, false)
 
-                    if (actualDias.length > 0) {
-                        fechas = [];
-                        fechasQuedada = fechaProximaQuedada(actualDias);
-                        listaQuedada = [];
-                        quedadaExists = true;
+                        if (actualDias.length > 0) {
+                            fechas = [];
+                            fechasQuedada = fechaProximaQuedada(actualDias);
+                            listaQuedada = [];
+                            quedadaExists = true;
 
-                        if (fechas.length > 0) {
-                            bot.sendMessage(chatId, generarListaQuedada()).then((message) => {
-                                idQuedada = message.message_id;
-                                bot.pinChatMessage(chatId, idQuedada);
-                            });
-                        } else {
-                            bot.sendMessage(chatId, 'No hay días válidos. Recuerda que solo valen los identificadores de los días de la semana (L M X J V S D) que aún no hayan pasado.')
+                            if (fechas.length > 0) {
+                                bot.sendMessage(chatId, generarListaQuedada()).then((message) => {
+                                    idQuedada = message.message_id;
+                                    bot.pinChatMessage(chatId, idQuedada, { disable_notification: true });
+                                });
+                            } else {
+                                bot.sendMessage(chatId, 'No hay días válidos. Recuerda que solo valen los identificadores de los días de la semana (L M X J V S D) que aún no hayan pasado.')
+                            }
                         }
+                    } else {
+                        bot.sendMessage(chatId, "Por favor, dime un día válido si no te importa... \n '/proximaQuedada sabado', por ejemplo.");
                     }
-                } else {
-                    bot.sendMessage(chatId, "Por favor, dime un día válido si no te importa... \n '/proximaQuedada sabado', por ejemplo.");
                 }
-            }
-            else {
-                bot.sendMessage(chatId, `Buen intento, @${user.username || user.first_name}, pero no eres admin ni mucho menos creador...`);
+                else {
+                    bot.sendMessage(chatId, `Buen intento, @${user.username || user.first_name}, pero no eres admin ni mucho menos creador...`);
+            } else {
+                bot.sendMessage(chatId, `Lo siento, ¡esta función es exclusiva del grupo Smash Málaga, y solo pueden usarlo Admins!`);
             }
         });
     }
@@ -559,7 +562,7 @@ bot.on('new_chat_members', (msg) => {
 cron.schedule('0 0 * * 1', () => {
     quedadaExists = false;
     listaQuedada.length = 0;
-    bot.sendMessage('-1001453683627', 'Se ha reiniciado la lista para esta semana.');
+    bot.sendMessage('-1001204113061', 'Nueva semana, ¡nueva lista!');
 })
 
 // Aquí igual, pero hacemos un recordatorio a los usuarios o a los admins de si hay quedada o no, los miércoles a las 16:00.
@@ -609,3 +612,5 @@ bot.onText(/\/mamataoacuanto/, (msg) => {
 
 // Colaboradores (esta es la parte en la que metes tu nombre si quieres, aunque solo hayas cambiado un pedacico de código, toda ayuda es bien agradecida):
 // Karka https://github.com/jmmdev / https://jmmdev.github.io)  =) (Rework del código)
+
+// Actualizado el 19 de junio
